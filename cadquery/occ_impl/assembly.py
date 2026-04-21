@@ -31,6 +31,10 @@ class Assembly:
         assy.add(some_shape, name="base", loc=Vector(0, 0, 10))
         assy.add(other_shape, name="top")
         compound = assy.to_compound()
+
+    Note: Child names default to an empty string if not provided, which can
+    make debugging assemblies with many unnamed children tricky. Consider
+    always passing a name when adding children for easier inspection.
     """
 
     def __init__(
@@ -87,6 +91,14 @@ class Assembly:
         self.children.append((child, child.name))
         return self
 
+    def __repr__(self) -> str:
+        """Return a readable summary of this assembly node."""
+        child_count = len(self.children)
+        has_shape = self.shape is not None
+        return (
+            f"Assembly(name={self.name!r}, shape={has_shape}, children={child_count})"
+        )
+
     def to_compound(self) -> Shape:
         """Flatten the assembly hierarchy into a single TopoDS_Compound Shape.
 
@@ -95,60 +107,4 @@ class Assembly:
 
         Returns:
             A Shape wrapping a TopoDS_Compound containing all sub-shapes.
-        """
-        builder = BRep_Builder()
-        compound = TopoDS_Compound()
-        builder.MakeCompound(compound)
-
-        self._add_to_compound(builder, compound, self.loc)
-
-        result = Shape(compound)
-        return result
-
-    def _add_to_compound(
-        self,
-        builder: BRep_Builder,
-        compound: TopoDS_Compound,
-        parent_loc: TopLoc_Location,
-    ) -> None:
-        """Recursively add shapes to the compound with accumulated transforms."""
-        # Compose parent location with this node's location
-        combined_loc = parent_loc.Multiplied(self.loc)
-
-        if self.shape is not None and not self.shape.is_null():
-            located_shape = self.shape.wrapped.Located(combined_loc)
-            builder.Add(compound, located_shape)
-
-        for child, _name in self.children:
-            child._add_to_compound(builder, compound, combined_loc)
-
-    def set_metadata(self, key: str, value: object) -> "Assembly":
-        """Attach arbitrary metadata to this assembly node.
-
-        Args:
-            key: Metadata key string.
-            value: Metadata value (any type).
-
-        Returns:
-            self, to allow method chaining.
-        """
-        self._metadata[key] = value
-        return self
-
-    def get_metadata(self, key: str) -> Optional[object]:
-        """Retrieve metadata by key.
-
-        Args:
-            key: Metadata key string.
-
-        Returns:
-            The stored value, or None if not found.
-        """
-        return self._metadata.get(key)
-
-    def __repr__(self) -> str:
-        return (
-            f"Assembly(name={self.name!r}, "
-            f"children={len(self.children)}, "
-            f"has_shape={self.shape is not None})"
-        )
+     
