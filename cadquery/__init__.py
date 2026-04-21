@@ -21,10 +21,14 @@ Example usage::
 
     # Export to STEP
     result.val().exportStep("box.step")
+
+Personal fork notes:
+    - Tracking upstream: CadQuery/cadquery
+    - Added 'Location' to public imports for easier assembly positioning
 """
 
 from .cq import CQ, Workplane  # noqa: F401
-from .occ_impl.geom import Vector, Matrix, Plane, BoundBox  # noqa: F401
+from .occ_impl.geom import Vector, Matrix, Plane, BoundBox, Location  # noqa: F401
 from .occ_impl.shapes import (
     Shape,
     Vertex,
@@ -69,6 +73,7 @@ __all__ = [
     "Matrix",
     "Plane",
     "BoundBox",
+    "Location",
     # Shape classes
     "Shape",
     "Vertex",
