@@ -22,6 +22,10 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
 
 VectorLike = Union["Vector", Tuple[float, float, float]]
 
+# Tolerance used for near-zero checks (e.g. normalization, comparisons).
+# Lowered from 1e-10 to 1e-12 for higher precision work.
+_ZERO_TOL = 1e-12
+
 
 class Vector:
     """A 3D vector with common geometric operations.
@@ -70,7 +74,7 @@ class Vector:
     def normalized(self) -> "Vector":
         """Return a unit vector in the same direction."""
         mag = self.length()
-        if mag < 1e-10:
+        if mag < _ZERO_TOL:
             raise ValueError("Cannot normalize a zero-length vector")
         return Vector(self.x / mag, self.y / mag, self.z / mag)
 
@@ -93,41 +97,4 @@ class Vector:
 
     def distance_to(self, other: "Vector") -> float:
         """Euclidean distance to another vector (treated as point)."""
-        return self.sub(other).length()
-
-    def to_pnt(self) -> gp_Pnt:
-        """Convert to OCC gp_Pnt."""
-        return gp_Pnt(self.x, self.y, self.z)
-
-    def to_dir(self) -> gp_Dir:
-        """Convert to OCC gp_Dir (unit direction)."""
-        n = self.normalized()
-        return gp_Dir(n.x, n.y, n.z)
-
-    def __add__(self, other: "Vector") -> "Vector":
-        return self.add(other)
-
-    def __sub__(self, other: "Vector") -> "Vector":
-        return self.sub(other)
-
-    def __mul__(self, scale: float) -> "Vector":
-        return self.multiply(scale)
-
-    def __rmul__(self, scale: float) -> "Vector":
-        return self.multiply(scale)
-
-    def __neg__(self) -> "Vector":
-        return self.multiply(-1.0)
-
-    def __repr__(self) -> str:
-        return f"Vector({self.x:.6g}, {self.y:.6g}, {self.z:.6g})"
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Vector):
-            return NotImplemented
-        return self.distance_to(other) < 1e-10
-
-    def __iter__(self):
-        yield self.x
-        yield self.y
-        yield self.z
+        return self.sub(other).le
