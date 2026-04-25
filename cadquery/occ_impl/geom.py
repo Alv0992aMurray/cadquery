@@ -95,6 +95,6 @@ class Vector:
     def multiply(self, scale: float) -> "Vector":
         return Vector(self._wrapped.Multiplied(scale))
 
-    def distance_to(self, other: "Vector") -> float:
-        """Euclidean distance to another vector (treated as point)."""
-        return self.sub(other).le
+    def __repr__(self) -> str:
+        """Return a readable string representation of this vector."""
+        return f"Vector({self.x}, {self.y}, {self.z})"
